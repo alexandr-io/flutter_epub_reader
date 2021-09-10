@@ -4,10 +4,9 @@ import 'package:html/dom.dart' as dom;
 import 'package:epubx/epubx.dart';
 import 'package:html/parser.dart' as html;
 
-import 'package:alexandrio_epub/epub.dart';
+import '/epub.dart';
 
 class AlexandrioEpub {
-
   void getBookInfos(EpubBook epubBook) async {
     BookContent book = BookContent();
     book.title = epubBook.Title!;
@@ -20,15 +19,14 @@ class AlexandrioEpub {
     return;
   }
 
-  List<EpubChapter> getAllChapters(EpubBook epubBook) =>
-    epubBook.Chapters!.fold<List<EpubChapter>>(
-      [],
-      (current, next) {
-        current.add(next);
-        next.SubChapters!.forEach(current.add);
-        return current;
-      },
-    );
+  List<EpubChapter> getAllChapters(EpubBook epubBook) => epubBook.Chapters!.fold<List<EpubChapter>>(
+        [],
+        (current, next) {
+          current.add(next);
+          next.SubChapters!.forEach(current.add);
+          return current;
+        },
+      );
 
   List<dom.Element> removeDivs(List<dom.Element> content) {
     final result = <dom.Element>[];
@@ -60,7 +58,7 @@ class AlexandrioEpub {
 
       chapter.SubChapters!.forEach((EpubChapter subchapter) async {
         dom.Document content = html.parse(subchapter.HtmlContent);
-        
+
         bookInfos.htmlContent.add(content.body!);
         // if (infos != null && infos.htmlContent.isNotEmpty) {
         //   for (var i = 0; i < infos.htmlContent.length; ++i) {
@@ -89,5 +87,4 @@ class AlexandrioEpub {
   }
 
   AlexandrioEpub();
-
 }

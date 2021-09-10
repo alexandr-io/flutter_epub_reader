@@ -12,12 +12,14 @@ class EPUBBook extends StatefulWidget {
   final String id;
   final String token;
   final Uint8List bytes;
+  final String title;
 
   const EPUBBook({
-    required Key key,
+    Key? key,
     required this.id,
     required this.token,
-    required this.bytes
+    required this.bytes,
+    required this.title,
   }) : super(key: key);
 
   @override
@@ -33,9 +35,7 @@ class _EPUBBookState extends State<EPUBBook> {
 
   @override
   void initState() {
-    _epubController = EpubController(
-      document: EpubReader.readBook(widget.bytes)
-    );
+    _epubController = EpubController(document: EpubReader.readBook(widget.bytes));
     _scrollController = ScrollController();
     super.initState();
   }
@@ -51,7 +51,7 @@ class _EPUBBookState extends State<EPUBBook> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test'),
+        title: Text(widget.title),
         actions: [
           IconButton(
             onPressed: () async => setState(() {
@@ -62,53 +62,51 @@ class _EPUBBookState extends State<EPUBBook> {
         ],
       ),
       body: compatibility
-        ? EpubView(controller: _epubController)
-        : Center(
-          child: AspectRatio(
-            aspectRatio: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? 4 / 3 : 1 / 2,
-            child: NotificationListener<ScrollNotification> (
-              onNotification: (scrollNotification) {
-                if (scrollNotification is ScrollEndNotification) {
-                  var progress = (_scrollController.offset * 100) / _scrollController.position.maxScrollExtent;
-                  // AlexandrioAPI().updateBookProgress(widget.credentials, widget.library, widget.book, progress.toString());
-                }
-                return true;
-              },
-              child: ListView(
-                controller: _scrollController,
-                // children: [
-                //   SizedBox(height: 64.0),
-                //   FutureBuilder<>(
-                //     future: ,
-                //     builder: (BuildContext context, AsyncSnapshot<> snapshot) {
-                //       if (snapshot.hasData) {
-                //         var content = snapshot.data;
-                //         return Center(
-                //           child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                //             for (var html in content.htmlContent)
-                //               Html(
-                //                 data: html.outerHtml,
-                //                 customRender: {
-                //                   'img': (context, child, attributes, node) {
-                //                     final url = attributes['src'].replaceAll('../', '');
-                //                     return Image(
-                //                       image: MemoryImage(
-                //                         Uint8List.fromList(_book.Content.Images[url].Content),
-                //                       )
-                //                     );
-                //                   }
-                //                 },
-                //               ),
-                //           ]),
-                //         );
-                //       }
-                //     }
-                //   )
-                // ],
-              )
-            ),
-          )
-        ),
+          ? EpubView(controller: _epubController)
+          : Center(
+              child: AspectRatio(
+              aspectRatio: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? 4 / 3 : 1 / 2,
+              child: NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification is ScrollEndNotification) {
+                      var progress = (_scrollController.offset * 100) / _scrollController.position.maxScrollExtent;
+                      // AlexandrioAPI().updateBookProgress(widget.credentials, widget.library, widget.book, progress.toString());
+                    }
+                    return true;
+                  },
+                  child: ListView(
+                    controller: _scrollController,
+                    // children: [
+                    //   SizedBox(height: 64.0),
+                    //   FutureBuilder<>(
+                    //     future: ,
+                    //     builder: (BuildContext context, AsyncSnapshot<> snapshot) {
+                    //       if (snapshot.hasData) {
+                    //         var content = snapshot.data;
+                    //         return Center(
+                    //           child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                    //             for (var html in content.htmlContent)
+                    //               Html(
+                    //                 data: html.outerHtml,
+                    //                 customRender: {
+                    //                   'img': (context, child, attributes, node) {
+                    //                     final url = attributes['src'].replaceAll('../', '');
+                    //                     return Image(
+                    //                       image: MemoryImage(
+                    //                         Uint8List.fromList(_book.Content.Images[url].Content),
+                    //                       )
+                    //                     );
+                    //                   }
+                    //                 },
+                    //               ),
+                    //           ]),
+                    //         );
+                    //       }
+                    //     }
+                    //   )
+                    // ],
+                  )),
+            )),
     );
   }
 
