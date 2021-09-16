@@ -1,25 +1,28 @@
 import 'dart:typed_data';
-import 'dart:io';
 
 import 'package:epub_view/epub_view.dart';
 import 'package:epubx/epubx.dart' hide Image;
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 
-import '/data/book_data.dart';
+import 'flutter_bookmark.dart';
+import 'flutter_epub.dart';
 
 class EPUBBook extends StatefulWidget {
-  final String id;
+  final String book;
+  final String library;
   final String token;
   final Uint8List bytes;
   final String title;
+  final String? progress;
 
   const EPUBBook({
     Key? key,
-    required this.id,
+    required this.book,
+    required this.library,
     required this.token,
     required this.bytes,
     required this.title,
+    required this.progress,
   }) : super(key: key);
 
   @override
@@ -27,16 +30,45 @@ class EPUBBook extends StatefulWidget {
 }
 
 class _EPUBBookState extends State<EPUBBook> {
+  late AlexandrioAPIController _alexandrioController;
   late EpubController _epubController;
   late ScrollController _scrollController;
-  late EpubBook _book;
+  late TextEditingController _textEditingController;
 
-  bool compatibility = true;
+  List<AlexandrioBookmark> bookmarkList = [];
+  bool isLongPressed = false;
+  double button1pos = 1.5;
+  double button2pos = 1.5;
+  double currentPosX = 0;
+  double currentPosY = 0;
+
+  void _showIconOption(LongPressStartDetails details, BuildContext context) {
+    setState(() {
+      isLongPressed = true;
+      currentPosX = MediaQuery.of(context).size.width - 100;
+      currentPosY = details.globalPosition.dy;
+    });
+  }
+  
+  void _fillIconList(double _posX, double _posY, bool _isNote, String _note, int _id) {
+    setState(() {
+      var tmp = AlexandrioBookmark(posX: _posX, posY: _posY, id: _id, status: () { _removeIconFromList(_id); }, isNote: _isNote, note: _note);
+      bookmarkList.add(tmp);
+    });
+  }
+
+  void _removeIconFromList(int _id) {
+    setState(() {
+      bookmarkList.removeWhere((element) => element.id == _id);
+    });
+  }
 
   @override
   void initState() {
-    _epubController = EpubController(document: EpubReader.readBook(widget.bytes));
+    _alexandrioController = AlexandrioAPIController();
+    _epubController = EpubController(document: EpubReader.readBook(widget.bytes), epubCfi: widget.progress); 
     _scrollController = ScrollController();
+    _textEditingController = TextEditingController();
     super.initState();
   }
 
@@ -54,71 +86,90 @@ class _EPUBBookState extends State<EPUBBook> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            onPressed: () async => setState(() {
-              compatibility = !compatibility;
-            }),
-            icon: const Icon(Icons.compare),
+            onPressed: () {
+              final cfi = _epubController.generateEpubCfi();
+              _alexandrioController.postProgression(widget.token, widget.book, widget.library, cfi);
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back),
           )
         ],
       ),
-      body: compatibility
-          ? EpubView(controller: _epubController)
-          : Center(
-              child: AspectRatio(
-              aspectRatio: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? 4 / 3 : 1 / 2,
-              child: NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification is ScrollEndNotification) {
-                      var progress = (_scrollController.offset * 100) / _scrollController.position.maxScrollExtent;
-                      // AlexandrioAPI().updateBookProgress(widget.credentials, widget.library, widget.book, progress.toString());
+      drawer: Drawer(
+        child: EpubReaderTableOfContents(
+          controller: _epubController,
+        )
+      ),
+      body:
+          Stack(
+            children: [
+              ...bookmarkList,
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onLongPressStart: (LongPressStartDetails details) => {
+                  button1pos = 0.95,
+                  button2pos = 0.8,
+                  _showIconOption(details, context)
+                },
+                onTap: () => { setState(() => { isLongPressed = false }) },
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 1 / 1.4142,
+                    child: EpubView(controller: _epubController),
+                  )
+                )
+              ),
+              if (isLongPressed == true)
+                Align(
+                  alignment: Alignment(button1pos, 0.9),
+                  child: FloatingActionButton(
+                    tooltip: "Add a bookmark",
+                    child: const Icon(Icons.star),
+                    onPressed: () => {
+                      _fillIconList(currentPosX, currentPosY, false, '', bookmarkList.length + 1),
+                      button1pos = 1.5,
+                      button2pos = 1.5
                     }
-                    return true;
-                  },
-                  child: ListView(
-                    controller: _scrollController,
-                    // children: [
-                    //   SizedBox(height: 64.0),
-                    //   FutureBuilder<>(
-                    //     future: ,
-                    //     builder: (BuildContext context, AsyncSnapshot<> snapshot) {
-                    //       if (snapshot.hasData) {
-                    //         var content = snapshot.data;
-                    //         return Center(
-                    //           child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                    //             for (var html in content.htmlContent)
-                    //               Html(
-                    //                 data: html.outerHtml,
-                    //                 customRender: {
-                    //                   'img': (context, child, attributes, node) {
-                    //                     final url = attributes['src'].replaceAll('../', '');
-                    //                     return Image(
-                    //                       image: MemoryImage(
-                    //                         Uint8List.fromList(_book.Content.Images[url].Content),
-                    //                       )
-                    //                     );
-                    //                   }
-                    //                 },
-                    //               ),
-                    //           ]),
-                    //         );
-                    //       }
-                    //     }
-                    //   )
-                    // ],
-                  )),
-            )),
+                  )
+                ),
+              if (isLongPressed == true)
+                Align(
+                  alignment: Alignment(button2pos, 0.9),
+                  child: FloatingActionButton(
+                    tooltip: "Add a note",
+                    child: const Icon(Icons.notes),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: const Text('Write your note'),
+                        content: TextField(
+                          controller: _textEditingController,
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => {
+                              _fillIconList(currentPosX, currentPosY, true, _textEditingController.text, bookmarkList.length + 1),
+                              button1pos = 1.5,
+                              button2pos = 1.5,
+                              Navigator.pop(context, "Add")
+                            },
+                            child: const Text("Add"),
+                          ),
+                          TextButton(
+                            onPressed: () => {
+                              button1pos = 1.5,
+                              button2pos = 1.5,
+                              Navigator.pop(context, "Cancel")
+                            },
+                            child: const Text("Cancel")
+                          )
+                        ]
+                      )
+                    )
+                  )
+                )
+            ], 
+          ),
     );
   }
-
-  // Future<BookData> _getEpubData(BuildContext context) async {
-  //   var epub = await EpubReader.readBook(widget.bytes);
-  //   _book = epub;
-
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     var offset = (double.parse(widget.progression ?? '0') * _scrollController.position.maxScrollExtent) / 100;
-  //     _scrollController.jumpTo(offset);
-  //   });
-
-  //   return fillTextList(context, epub);
-  // }
 }
