@@ -25,7 +25,6 @@ class AlexandrioBookmark extends StatefulWidget {
 }
 
 class _AlexandrioIconState extends State<AlexandrioBookmark> {
-
   @override
   Widget build(BuildContext context) {
     if (widget.isNote == false) {
