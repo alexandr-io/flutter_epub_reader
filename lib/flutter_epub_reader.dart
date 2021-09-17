@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:epub_view/epub_view.dart';
 import 'package:epubx/epubx.dart' hide Image;
@@ -40,7 +41,6 @@ class _EPUBBookState extends State<EPUBBook> {
   bool isLongPressed = false;
   double button1pos = 1.5;
   double button2pos = 1.5;
-
   Future<bool> _initBookmarkList() async {
     var tmp = await _alexandrioController.getAllUserData(widget.token, widget.library, widget.book);
     setState(() {
@@ -54,7 +54,11 @@ class _EPUBBookState extends State<EPUBBook> {
   void _showBookmarkOptions() {
     setState(() {
       button1pos = 0.95;
-      button2pos = 0.8;
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        button2pos = 0.8;
+      } else {
+        button2pos = 0.7;
+      }
       isLongPressed = true;
     });
   }
