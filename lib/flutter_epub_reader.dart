@@ -57,7 +57,7 @@ class _EPUBBookState extends State<EPUBBook> {
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
         button2pos = 0.8;
       } else {
-        button2pos = 0.7;
+        button2pos = 0.6;
       }
       isLongPressed = true;
     });
