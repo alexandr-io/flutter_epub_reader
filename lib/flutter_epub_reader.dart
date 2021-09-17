@@ -170,7 +170,7 @@ class _EPUBBookState extends State<EPUBBook> {
                   alignment: Alignment(button1pos, 0.9),
                   child: FloatingActionButton(
                     tooltip: "Add a bookmark",
-                    child: const Icon(Icons.star),
+                    child: const Icon(Icons.bookmark),
                     onPressed: () => {
                       _fillIconList(_epubController.generateEpubCfi()!, false, '', bookmarkList.length + 1),
                       button1pos = 1.5,
@@ -216,34 +216,6 @@ class _EPUBBookState extends State<EPUBBook> {
                 ),
             ], 
           ),
-          if (isLongPressed == true) Align(alignment: Alignment(button1pos, 0.9), child: FloatingActionButton(tooltip: "Add a bookmark", child: const Icon(Icons.star), onPressed: () => {_fillIconList(currentPosX, currentPosY, false, '', bookmarkList.length + 1), button1pos = 1.5, button2pos = 1.5})),
-          if (isLongPressed == true)
-            Align(
-              alignment: Alignment(button2pos, 0.9),
-              child: FloatingActionButton(
-                tooltip: "Add a note",
-                child: const Icon(Icons.notes),
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: const Text('Write your note'),
-                    content: TextField(
-                      controller: _textEditingController,
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => {_fillIconList(currentPosX, currentPosY, true, _textEditingController.text, bookmarkList.length + 1), button1pos = 1.5, button2pos = 1.5, Navigator.pop(context, "Add")},
-                        child: const Text("Add"),
-                      ),
-                      TextButton(onPressed: () => {button1pos = 1.5, button2pos = 1.5, Navigator.pop(context, "Cancel")}, child: const Text("Cancel"))
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ...bookmarkList,
-        ],
-      ),
     );
   }
 }
