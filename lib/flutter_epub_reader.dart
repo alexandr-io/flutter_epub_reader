@@ -35,12 +35,15 @@ class _EPUBBookState extends State<EPUBBook> {
   late EpubController _epubController;
   late ScrollController _scrollController;
   late TextEditingController _textEditingController;
+
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey();
+  final GlobalKey<EpubViewState> _epubViewKey = GlobalKey();
 
   List<AlexandrioBookmark> bookmarkList = [];
   bool isLongPressed = false;
   double button1pos = 1.5;
   double button2pos = 1.5;
+
   Future<bool> _initBookmarkList() async {
     var tmp = await _alexandrioController.getAllUserData(widget.token, widget.library, widget.book);
     setState(() {
@@ -57,7 +60,7 @@ class _EPUBBookState extends State<EPUBBook> {
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
         button2pos = 0.8;
       } else {
-        button2pos = 0.6;
+        button2pos = 0.5;
       }
       isLongPressed = true;
     });
@@ -84,12 +87,14 @@ class _EPUBBookState extends State<EPUBBook> {
   @override
   void initState() {
     _alexandrioController = AlexandrioAPIController();
-    _epubController = EpubController(document: EpubReader.readBook(widget.bytes), epubCfi: widget.progress);
+    _epubController = EpubController(document: EpubReader.readBook(widget.bytes));
     _scrollController = ScrollController();
     _textEditingController = TextEditingController();
+
     _initBookmarkList().then((tmp) {
       if (bookmarkList.isNotEmpty) _alexandrioController.deleteAllUserData(widget.token, widget.library, widget.book);
     });
+
     super.initState();
   }
 
@@ -105,7 +110,13 @@ class _EPUBBookState extends State<EPUBBook> {
     return Scaffold(
       key: _globalKey,
       appBar: AppBar(
-        title: Text(widget.title),
+        // title: EpubActualChapter(
+        //   controller: _epubController,
+        //   builder: (chapterValue) => Text(
+        //     'Chapter ${chapterValue?.chapter?.Title ?? ''}',
+        //     textAlign: TextAlign.start,
+        //   )
+        // ),
         actions: [
           IconButton(
             onPressed: () { _globalKey.currentState!.openEndDrawer(); },
@@ -114,8 +125,10 @@ class _EPUBBookState extends State<EPUBBook> {
           ),
           IconButton(
             onPressed: () {
-              final cfi = _epubController.generateEpubCfi();
-              _alexandrioController.postProgression(widget.token, widget.book, widget.library, cfi);
+              var progression = _epubViewKey.currentState!.position();
+              // final cfi = _epubController.generateEpubCfi();
+              // _alexandrioController.postProgression(widget.token, widget.book, widget.library, cfi);
+              _alexandrioController.postProgression(widget.token, widget.book, widget.library, progression);
               bookmarkList.forEach((element) {
                 _alexandrioController.postUserData(widget.token, widget.library, widget.book, element.isNote ? 'note' : 'bookmark', element.note, element.isNote ? 'note' : 'bookmark', element.pos!);
               });
@@ -142,11 +155,11 @@ class _EPUBBookState extends State<EPUBBook> {
         //       } 
         //       if (bookmarkList.isNotEmpty) _alexandrioController.deleteAllUserData(widget.token, widget.library, widget.book);
         //       return 
-              ListView(
-                children: [
-                  ...bookmarkList
-                ],
-              )
+          ListView(
+            children: [
+              ...bookmarkList
+            ],
+          )
         //     }
         //     return const CircularProgressIndicator.adaptive();
         //   }
@@ -165,7 +178,7 @@ class _EPUBBookState extends State<EPUBBook> {
                 child: Center(
                   child: AspectRatio(
                     aspectRatio: 1 / 1.4142,
-                    child: EpubView(controller: _epubController),
+                    child: EpubView(key: _epubViewKey, controller: _epubController, progression: widget.progress!),
                   )
                 )
               ),
@@ -201,6 +214,7 @@ class _EPUBBookState extends State<EPUBBook> {
                               _fillIconList(_epubController.generateEpubCfi()!, true, _textEditingController.text, bookmarkList.length + 1),
                               button1pos = 1.5,
                               button2pos = 1.5,
+                              _textEditingController.text = '',
                               Navigator.pop(context, "Add")
                             },
                             child: const Text("Add"),
