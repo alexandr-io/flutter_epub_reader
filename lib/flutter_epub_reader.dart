@@ -66,14 +66,14 @@ class _EPUBBookState extends State<EPUBBook> {
     });
   }
 
-  void _epubRedirect(String cfi) {
-    _epubController.gotoEpubCfi(cfi);
+  void _epubRedirect(String position) {
+    _epubViewKey.currentState!.goToPosition(double.parse(position));
     Navigator.pop(context);
   }
   
-  void _fillIconList(String cfi, bool _isNote, String _note, int _id) {
+  void _fillIconList(String position, bool _isNote, String _note, int _id) {
     setState(() {
-      var tmp = AlexandrioBookmark(pos: cfi, id: _id, status: () { _removeIconFromList(_id); }, redirect: () { _epubRedirect(cfi); }, isNote: _isNote, note: _note, dataId: '');
+      var tmp = AlexandrioBookmark(pos: position, id: _id, status: () { _removeIconFromList(_id); }, redirect: () { _epubRedirect(position); }, isNote: _isNote, note: _note, dataId: '');
       bookmarkList.add(tmp);
     });
   }
@@ -117,6 +117,7 @@ class _EPUBBookState extends State<EPUBBook> {
         //     textAlign: TextAlign.start,
         //   )
         // ),
+        title: Text(widget.book),
         actions: [
           IconButton(
             onPressed: () { _globalKey.currentState!.openEndDrawer(); },
@@ -189,7 +190,7 @@ class _EPUBBookState extends State<EPUBBook> {
                     tooltip: "Add a bookmark",
                     child: const Icon(Icons.bookmark),
                     onPressed: () => {
-                      _fillIconList(_epubController.generateEpubCfi()!, false, '', bookmarkList.length + 1),
+                      _fillIconList(_epubViewKey.currentState!.position(), false, '', bookmarkList.length + 1),
                       button1pos = 1.5,
                       button2pos = 1.5
                     }
@@ -211,7 +212,7 @@ class _EPUBBookState extends State<EPUBBook> {
                         actions: <Widget>[
                           TextButton(
                             onPressed: () => {
-                              _fillIconList(_epubController.generateEpubCfi()!, true, _textEditingController.text, bookmarkList.length + 1),
+                              _fillIconList(_epubViewKey.currentState!.position(), true, _textEditingController.text, bookmarkList.length + 1),
                               button1pos = 1.5,
                               button2pos = 1.5,
                               _textEditingController.text = '',
