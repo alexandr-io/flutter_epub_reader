@@ -146,7 +146,65 @@ class _EPUBBookState extends State<EPUBBook> {
         )
       ),
       endDrawer: Drawer(
-        child: 
+        child: ListView(
+          children: [
+            for (var bookmark in bookmarkList)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Material(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(32.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              !bookmark.isNote ? Icons.bookmark : Icons.book,
+                              color: Colors.white.withAlpha(196),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // if (bookmark.isNote)
+                            Text(
+                              bookmark.isNote ? 'Note' : 'Bookmark',
+                              style: Theme.of(context).textTheme.subtitle1,
+                            ),
+                            Text(
+                              bookmark.isNote
+                                  ? '${bookmark.note}'
+                                  : '',
+                              style: Theme.of(context).textTheme.subtitle2,
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () { _epubViewKey.currentState!.goToPosition(double.parse(bookmark.pos!)); },
+                        icon: const Icon(Icons.fmd_good_outlined),
+                      ),
+                      IconButton(
+                        onPressed: () { 
+                          setState(() {
+                            bookmarkList.removeWhere((element) => element.id == bookmark.id);
+                          });
+                         },
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ]
+        )
         // FutureBuilder<List<List<String>>> (
         //   future: _alexandrioController.getAllUserData(widget.token, widget.library, widget.book),
         //   builder: (context, snapshot) {
@@ -156,11 +214,11 @@ class _EPUBBookState extends State<EPUBBook> {
         //       } 
         //       if (bookmarkList.isNotEmpty) _alexandrioController.deleteAllUserData(widget.token, widget.library, widget.book);
         //       return 
-          ListView(
-            children: [
-              ...bookmarkList
-            ],
-          )
+        // ListView(
+        //   children: [
+        //     ...bookmarkList
+        //   ],
+        // )
         //     }
         //     return const CircularProgressIndicator.adaptive();
         //   }
