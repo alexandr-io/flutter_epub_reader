@@ -48,7 +48,7 @@ class _EPUBBookState extends State<EPUBBook> {
     var tmp = await _alexandrioController.getAllUserData(widget.token, widget.library, widget.book);
     setState(() {
       for (var data in tmp) {
-        bookmarkList.add(AlexandrioBookmark(pos: data[0], id: bookmarkList.length + 1, status: () { _removeIconFromList(bookmarkList.length + 1); }, redirect: () { _epubRedirect(data[0]); }, isNote: data[data.length - 1] == 'note' ? true : false, note: data[2], dataId: data[1]));
+        bookmarkList.add(AlexandrioBookmark(pos: data[0], id: bookmarkList.length + 1, status: () { }, redirect: () { _epubRedirect(data[0]); }, isNote: data[data.length - 1] == 'note' ? true : false, note: data[2], dataId: data[1]));
       }
     });
     return true;
@@ -71,17 +71,19 @@ class _EPUBBookState extends State<EPUBBook> {
     Navigator.pop(context);
   }
   
-  void _fillIconList(String position, bool _isNote, String _note, int _id) {
+  Future<void> _fillIconList(String position, bool _isNote, String _note, int _id) async {
     setState(() {
-      var tmp = AlexandrioBookmark(pos: position, id: _id, status: () { _removeIconFromList(_id); }, redirect: () { _epubRedirect(position); }, isNote: _isNote, note: _note, dataId: '');
+      var tmp = AlexandrioBookmark(pos: position, id: _id, status: () { }, redirect: () { _epubRedirect(position); }, isNote: _isNote, note: _note, dataId: '');
       bookmarkList.add(tmp);
     });
+    _alexandrioController.postUserData(widget.token, widget.library, widget.book, _isNote ? 'note' : 'bookmark' , _note, _isNote ? 'note' : 'bookmark', position);
   }
 
-  void _removeIconFromList(int _id) {
+  Future<void> _removeIconFromList(int _id, String _dataId) async {
     setState(() {
       bookmarkList.removeWhere((element) => element.id == _id);
     });
+    _alexandrioController.deleteUserData(widget.token, widget.library, widget.book, _dataId);
   }
 
   @override
@@ -91,9 +93,7 @@ class _EPUBBookState extends State<EPUBBook> {
     _scrollController = ScrollController();
     _textEditingController = TextEditingController();
 
-    _initBookmarkList().then((tmp) {
-      if (bookmarkList.isNotEmpty) _alexandrioController.deleteAllUserData(widget.token, widget.library, widget.book);
-    });
+    _initBookmarkList();
 
     super.initState();
   }
@@ -130,9 +130,9 @@ class _EPUBBookState extends State<EPUBBook> {
               // final cfi = _epubController.generateEpubCfi();
               // _alexandrioController.postProgression(widget.token, widget.book, widget.library, cfi);
               _alexandrioController.postProgression(widget.token, widget.book, widget.library, progression);
-              bookmarkList.forEach((element) {
-                _alexandrioController.postUserData(widget.token, widget.library, widget.book, element.isNote ? 'note' : 'bookmark', element.note, element.isNote ? 'note' : 'bookmark', element.pos!);
-              });
+              // bookmarkList.forEach((element) {
+              //   _alexandrioController.postUserData(widget.token, widget.library, widget.book, element.isNote ? 'note' : 'bookmark', element.note, element.isNote ? 'note' : 'bookmark', element.pos!);
+              // });
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.arrow_back),
@@ -193,9 +193,10 @@ class _EPUBBookState extends State<EPUBBook> {
                       ),
                       IconButton(
                         onPressed: () { 
-                          setState(() {
-                            bookmarkList.removeWhere((element) => element.id == bookmark.id);
-                          });
+                          // setState(() {
+                          //   bookmarkList.removeWhere((element) => element.id == bookmark.id);
+                          // });
+                          _removeIconFromList(bookmark.id, bookmark.dataId);
                          },
                         icon: const Icon(Icons.delete),
                       ),
