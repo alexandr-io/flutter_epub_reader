@@ -1,6 +1,7 @@
 name: flutter_epub_reader
 description: A flutter epub widget for Alexandrio.
 version: 0.0.1
+publish_to: "none"
 homepage:
 
 environment:
@@ -13,7 +14,9 @@ dependencies:
   html: any
   http: any
   epubx: any
-  epub_view: any
+  epub_view:
+    git: https://github.com/alexandr-io/epub_view_clone
+    # path: ../epub_view_clone
 
 dev_dependencies:
   flutter_test:

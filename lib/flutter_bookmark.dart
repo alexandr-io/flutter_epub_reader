@@ -25,6 +25,24 @@ class AlexandrioBookmark extends StatefulWidget {
 }
 
 class _AlexandrioIconState extends State<AlexandrioBookmark> {
+
+  void _showText(String text) {
+    showDialog(context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Your comment'),
+          content: Text(text),
+          actions: [
+            TextButton(
+              onPressed: () => { Navigator.pop(context) },
+              child: const Text('Close'),
+            )
+          ],
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.isNote == false) {
@@ -35,7 +53,7 @@ class _AlexandrioIconState extends State<AlexandrioBookmark> {
       // );
       return Row(
           children: <Widget>[
-            const Spacer(),
+            //const Spacer(),
             const Expanded(
               child: Center(
                 child: Icon(Icons.bookmark),
@@ -45,7 +63,8 @@ class _AlexandrioIconState extends State<AlexandrioBookmark> {
               child: Center(
                 child: IconButton(
                   onPressed: () => { widget.redirect() },
-                  icon: const Icon(Icons.arrow_right_alt_rounded)
+                  icon: const Icon(Icons.fmd_good_rounded ),
+                  tooltip: 'Go to location',
                 )
               ),
             ),
@@ -54,7 +73,8 @@ class _AlexandrioIconState extends State<AlexandrioBookmark> {
                 child: IconButton(
                   onPressed: () => widget.status(),
                   color: Colors.red,
-                  icon: const Icon(Icons.highlight_remove_sharp)
+                  icon: const Icon(Icons.delete),
+                  tooltip: 'Delete'
                 )
               )
             )
@@ -69,20 +89,21 @@ class _AlexandrioIconState extends State<AlexandrioBookmark> {
       // );    
       return Row(
           children: <Widget>[
-            const Spacer(),
             Expanded(
               child: Center(
-                child: Tooltip(
-                  message: widget.note,
-                  child: const Icon(Icons.messenger),
-                ) 
+                child: IconButton(
+                  onPressed: () => _showText(widget.note),
+                  icon: const Icon(Icons.messenger),
+                  tooltip: 'Show note',
+                )
               )
             ),
             Expanded(
               child: Center(
                 child: IconButton(
                   onPressed: () => { widget.redirect() },
-                  icon: const Icon(Icons.arrow_right_alt_rounded)
+                  icon: const Icon(Icons.fmd_good_rounded ),
+                  tooltip: 'Go to location',
                 )
               ),
             ),
@@ -91,7 +112,8 @@ class _AlexandrioIconState extends State<AlexandrioBookmark> {
                 child: IconButton(
                   onPressed: () => widget.status(),
                   color: Colors.red,
-                  icon: const Icon(Icons.highlight_remove_sharp)
+                  icon: const Icon(Icons.delete),
+                  tooltip: 'Delete',
                 )
               )
             )
