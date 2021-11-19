@@ -238,7 +238,7 @@ class _EPUBBookState extends State<EPUBBook> {
                 child: Center(
                   child: AspectRatio(
                     aspectRatio: 1 / 1.4142,
-                    child: EpubView(key: _epubViewKey, controller: _epubController, progression: widget.progress!),
+                    child: EpubView(key: _epubViewKey, controller: _epubController, progression: widget.progress ?? '0'),
                   )
                 )
               ),
