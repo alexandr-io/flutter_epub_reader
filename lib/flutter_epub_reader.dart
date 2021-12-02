@@ -224,7 +224,14 @@ class _EPUBBookState extends State<EPUBBook> {
                 aspectRatio: 1 / 1.4142,
                 child: EpubView(key: _epubViewKey, controller: _epubController, progression: widget.progress!),
               ))),
-          if (isLongPressed == true) Align(alignment: Alignment(button1pos, 0.9), child: FloatingActionButton(tooltip: "Add a bookmark", child: const Icon(Icons.bookmark), onPressed: () => {_fillIconList(_epubViewKey.currentState!.position(), false, '', bookmarkList.length + 1), button1pos = 1.5, button2pos = 1.5})),
+          if (isLongPressed == true)
+            Align(
+                alignment: Alignment(button1pos, 0.9),
+                child: FloatingActionButton(
+                  tooltip: "Add a bookmark",
+                  child: const Icon(Icons.bookmark),
+                  onPressed: () => {_fillIconList(_epubViewKey.currentState!.position(), false, '', bookmarkList.length + 1), button1pos = 1.5, button2pos = 1.5},
+                )),
           if (isLongPressed == true)
             Align(
                 alignment: Alignment(button2pos, 0.9),
