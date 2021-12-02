@@ -48,7 +48,16 @@ class _EPUBBookState extends State<EPUBBook> {
     var tmp = await _alexandrioController.getAllUserData(widget.token, widget.library, widget.book);
     setState(() {
       for (var data in tmp) {
-        bookmarkList.add(AlexandrioBookmark(pos: data[0], id: bookmarkList.length + 1, status: () { }, redirect: () { _epubRedirect(data[0]); }, isNote: data[data.length - 1] == 'note' ? true : false, note: data[2], dataId: data[1]));
+        bookmarkList.add(AlexandrioBookmark(
+            pos: data[0],
+            id: bookmarkList.length + 1,
+            status: () {},
+            redirect: () {
+              _epubRedirect(data[0]);
+            },
+            isNote: data[data.length - 1] == 'note' ? true : false,
+            note: data[2],
+            dataId: data[1]));
       }
     });
     return true;
@@ -70,13 +79,22 @@ class _EPUBBookState extends State<EPUBBook> {
     _epubViewKey.currentState!.goToPosition(double.parse(position));
     Navigator.pop(context);
   }
-  
+
   Future<void> _fillIconList(String position, bool _isNote, String _note, int _id) async {
     setState(() {
-      var tmp = AlexandrioBookmark(pos: position, id: _id, status: () { }, redirect: () { _epubRedirect(position); }, isNote: _isNote, note: _note, dataId: '');
+      var tmp = AlexandrioBookmark(
+          pos: position,
+          id: _id,
+          status: () {},
+          redirect: () {
+            _epubRedirect(position);
+          },
+          isNote: _isNote,
+          note: _note,
+          dataId: '');
       bookmarkList.add(tmp);
     });
-    _alexandrioController.postUserData(widget.token, widget.library, widget.book, _isNote ? 'note' : 'bookmark' , _note, _isNote ? 'note' : 'bookmark', position);
+    _alexandrioController.postUserData(widget.token, widget.library, widget.book, _isNote ? 'note' : 'bookmark', _note, _isNote ? 'note' : 'bookmark', position);
   }
 
   Future<void> _removeIconFromList(int _id, String _dataId) async {
@@ -110,29 +128,19 @@ class _EPUBBookState extends State<EPUBBook> {
     return Scaffold(
       key: _globalKey,
       appBar: AppBar(
-        // title: EpubActualChapter(
-        //   controller: _epubController,
-        //   builder: (chapterValue) => Text(
-        //     'Chapter ${chapterValue?.chapter?.Title ?? ''}',
-        //     textAlign: TextAlign.start,
-        //   )
-        // ),
         title: Text(widget.book),
         actions: [
           IconButton(
-            onPressed: () { _globalKey.currentState!.openEndDrawer(); },
+            onPressed: () {
+              _globalKey.currentState!.openEndDrawer();
+            },
             icon: const Icon(Icons.bookmark),
             tooltip: "Bookmarks",
           ),
           IconButton(
             onPressed: () {
               var progression = _epubViewKey.currentState!.position();
-              // final cfi = _epubController.generateEpubCfi();
-              // _alexandrioController.postProgression(widget.token, widget.book, widget.library, cfi);
               _alexandrioController.postProgression(widget.token, widget.book, widget.library, progression);
-              // bookmarkList.forEach((element) {
-              //   _alexandrioController.postUserData(widget.token, widget.library, widget.book, element.isNote ? 'note' : 'bookmark', element.note, element.isNote ? 'note' : 'bookmark', element.pos!);
-              // });
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.arrow_back),
@@ -141,159 +149,104 @@ class _EPUBBookState extends State<EPUBBook> {
         ],
       ),
       drawer: Drawer(
-        child: EpubReaderTableOfContents(
-          controller: _epubController,
-        )
-      ),
+          child: EpubReaderTableOfContents(
+        controller: _epubController,
+      )),
       endDrawer: Drawer(
-        child: ListView(
-          children: [
-            for (var bookmark in bookmarkList)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Material(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(32.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              !bookmark.isNote ? Icons.bookmark : Icons.book,
-                              color: Colors.white.withAlpha(196),
-                            ),
-                          ),
+          child: ListView(children: [
+        for (var bookmark in bookmarkList)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Material(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(32.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(
+                          !bookmark.isNote ? Icons.bookmark : Icons.book,
+                          color: Colors.white.withAlpha(196),
                         ),
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // if (bookmark.isNote)
-                            Text(
-                              bookmark.isNote ? 'Note' : 'Bookmark',
-                              style: Theme.of(context).textTheme.subtitle1,
-                            ),
-                            Text(
-                              bookmark.isNote
-                                  ? '${bookmark.note}'
-                                  : '',
-                              style: Theme.of(context).textTheme.subtitle2,
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () { _epubViewKey.currentState!.goToPosition(double.parse(bookmark.pos!)); },
-                        icon: const Icon(Icons.fmd_good_outlined),
-                      ),
-                      IconButton(
-                        onPressed: () { 
-                          // setState(() {
-                          //   bookmarkList.removeWhere((element) => element.id == bookmark.id);
-                          // });
-                          _removeIconFromList(bookmark.id, bookmark.dataId);
-                         },
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // if (bookmark.isNote)
+                        Text(
+                          bookmark.isNote ? 'Note' : 'Bookmark',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                        Text(
+                          bookmark.isNote ? '${bookmark.note}' : '',
+                          style: Theme.of(context).textTheme.subtitle2,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _epubViewKey.currentState!.goToPosition(double.parse(bookmark.pos!));
+                    },
+                    icon: const Icon(Icons.fmd_good_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _removeIconFromList(bookmark.id, bookmark.dataId);
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
+                ],
               ),
-          ]
-        )
-        // FutureBuilder<List<List<String>>> (
-        //   future: _alexandrioController.getAllUserData(widget.token, widget.library, widget.book),
-        //   builder: (context, snapshot) {
-        //     if (snapshot.hasData) {
-        //       for (var data in snapshot.data!) {
-        //         bookmarkList.add(AlexandrioBookmark(pos: data[0], id: bookmarkList.length + 1, status: () { _removeIconFromList(bookmarkList.length + 1); }, redirect: () { _epubRedirect(data[0]); }, isNote: data[data.length] == 'note' ? true : false, note: data[2], dataId: data[1]));
-        //       } 
-        //       if (bookmarkList.isNotEmpty) _alexandrioController.deleteAllUserData(widget.token, widget.library, widget.book);
-        //       return 
-        // ListView(
-        //   children: [
-        //     ...bookmarkList
-        //   ],
-        // )
-        //     }
-        //     return const CircularProgressIndicator.adaptive();
-        //   }
-        // )
-      ),
+            ),
+          ),
+      ])),
       endDrawerEnableOpenDragGesture: true,
-      body:
-          Stack(
-            children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onLongPressStart: (LongPressStartDetails details) => {
-                  _showBookmarkOptions(),
-                },
-                onTap: () => { setState(() => { isLongPressed = false }) },
-                child: Center(
+      body: Stack(
+        children: [
+          GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onLongPressStart: (LongPressStartDetails details) => {
+                    _showBookmarkOptions(),
+                  },
+              onTap: () => {
+                    setState(() => {isLongPressed = false})
+                  },
+              child: Center(
                   child: AspectRatio(
-                    aspectRatio: 1 / 1.4142,
-                    child: EpubView(key: _epubViewKey, controller: _epubController, progression: widget.progress!),
-                  )
-                )
-              ),
-              if (isLongPressed == true)
-                Align(
-                  alignment: Alignment(button1pos, 0.9),
-                  child: FloatingActionButton(
-                    tooltip: "Add a bookmark",
-                    child: const Icon(Icons.bookmark),
-                    onPressed: () => {
-                      _fillIconList(_epubViewKey.currentState!.position(), false, '', bookmarkList.length + 1),
-                      button1pos = 1.5,
-                      button2pos = 1.5
-                    }
-                  )
-                ),
-              if (isLongPressed == true)
-                Align(
-                  alignment: Alignment(button2pos, 0.9),
-                  child: FloatingActionButton(
+                aspectRatio: 1 / 1.4142,
+                child: EpubView(key: _epubViewKey, controller: _epubController, progression: widget.progress!),
+              ))),
+          if (isLongPressed == true) Align(alignment: Alignment(button1pos, 0.9), child: FloatingActionButton(tooltip: "Add a bookmark", child: const Icon(Icons.bookmark), onPressed: () => {_fillIconList(_epubViewKey.currentState!.position(), false, '', bookmarkList.length + 1), button1pos = 1.5, button2pos = 1.5})),
+          if (isLongPressed == true)
+            Align(
+                alignment: Alignment(button2pos, 0.9),
+                child: FloatingActionButton(
                     tooltip: "Add a note",
                     child: const Icon(Icons.notes),
                     onPressed: () => showDialog(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        title: const Text('Write your note'),
-                        content: TextField(
-                          controller: _textEditingController,
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => {
-                              _fillIconList(_epubViewKey.currentState!.position(), true, _textEditingController.text, bookmarkList.length + 1),
-                              button1pos = 1.5,
-                              button2pos = 1.5,
-                              _textEditingController.text = '',
-                              Navigator.pop(context, "Add")
-                            },
-                            child: const Text("Add"),
-                          ),
-                          TextButton(
-                            onPressed: () => {
-                              button1pos = 1.5,
-                              button2pos = 1.5,
-                              Navigator.pop(context, "Cancel")
-                            },
-                            child: const Text("Cancel")
-                          )
-                        ]
-                      )
-                    )
-                  )
-                ),
-            ], 
-          ),
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                                title: const Text('Write your note'),
+                                content: TextField(
+                                  controller: _textEditingController,
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () => {_fillIconList(_epubViewKey.currentState!.position(), true, _textEditingController.text, bookmarkList.length + 1), button1pos = 1.5, button2pos = 1.5, _textEditingController.text = '', Navigator.pop(context, "Add")},
+                                    child: const Text("Add"),
+                                  ),
+                                  TextButton(onPressed: () => {button1pos = 1.5, button2pos = 1.5, Navigator.pop(context, "Cancel")}, child: const Text("Cancel"))
+                                ])))),
+        ],
+      ),
     );
   }
 }
