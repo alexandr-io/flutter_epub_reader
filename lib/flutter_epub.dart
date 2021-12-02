@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class AlexandrioAPIController {
   Future<void> postProgression(String token, String book, String library, String? progress) async {
-    var response = await http.post(Uri.parse('https://library.preprod.alexandrio.cloud/library/$library/book/$book/progress'),
+    var response = await http.post(Uri.parse('https://library.alexandrio.cloud/library/$library/book/$book/progress'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -17,7 +17,7 @@ class AlexandrioAPIController {
 
   Future<List<List<String>>> getAllUserData(String token, String libraryId, String bookId) async {
     var response = await http.get(
-      Uri.parse('https://library.preprod.alexandrio.cloud/library/$libraryId/book/$bookId/data'),
+      Uri.parse('https://library.alexandrio.cloud/library/$libraryId/book/$bookId/data'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -46,7 +46,7 @@ class AlexandrioAPIController {
 
   Future<void> deleteAllUserData(String token, String libraryId, String bookId) async {
     var response = await http.delete(
-      Uri.parse('https://library.preprod.alexandrio.cloud/library/$libraryId/book/$bookId/data'),
+      Uri.parse('https://library.alexandrio.cloud/library/$libraryId/book/$bookId/data'),
       headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
     );
 
@@ -54,7 +54,7 @@ class AlexandrioAPIController {
   }
 
   Future<void> postUserData(String token, String libraryId, String bookId, String type, String description, String name, String offset) async {
-    var response = await http.post(Uri.parse('https://library.preprod.alexandrio.cloud/library/$libraryId/book/$bookId/data'),
+    var response = await http.post(Uri.parse('https://library.alexandrio.cloud/library/$libraryId/book/$bookId/data'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode(
           {"name": description.isEmpty ? type : description, "offset": offset, "description": description, "type": type},
@@ -65,7 +65,7 @@ class AlexandrioAPIController {
 
   void deleteUserData(String token, String libraryId, String bookId, String dataId) async {
     var response = await http.delete(
-      Uri.parse('https://library.preprod.alexandrio.cloud/library/$libraryId/book/$bookId/data/$dataId'),
+      Uri.parse('https://library.alexandrio.cloud/library/$libraryId/book/$bookId/data/$dataId'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
