@@ -128,7 +128,7 @@ class _EPUBBookState extends State<EPUBBook> {
     return Scaffold(
       key: _globalKey,
       appBar: AppBar(
-        title: Text(widget.book),
+        title: Text(widget.title),
         actions: [
           IconButton(
             onPressed: () {
